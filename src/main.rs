@@ -14,10 +14,10 @@ use terrain::TerrainGenerator;
 #[command(name = "terrain-generator")]
 #[command(about = "Generate realistic terrain for fictional worlds")]
 struct Args {
-    #[arg(short, long, default_value = "512")]
+    #[arg(short, long, default_value = "2048")]
     width: u32,
     
-    #[arg(short = 'H', long, default_value = "512")]
+    #[arg(short = 'H', long, default_value = "2048")]
     height: u32,
     
     #[arg(short = 'p', long, default_value = "30.0")]
