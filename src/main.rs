@@ -28,6 +28,9 @@ struct Args {
     
     #[arg(long, default_value = "42")]
     seed: u64,
+    
+    #[arg(long, default_value = "false")]
+    json: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,9 +105,11 @@ fn main() {
     output::export_png(&terrain_data, &format!("{}.png", args.output))
         .expect("Failed to export PNG");
     
-    println!("Exporting JSON data...");
-    output::export_json(&terrain_data, &format!("{}.json", args.output))
-        .expect("Failed to export JSON");
+    if args.json {
+        println!("Exporting JSON data...");
+        output::export_json(&terrain_data, &format!("{}.json", args.output))
+            .expect("Failed to export JSON");
+    }
     
     println!("Terrain generation complete!");
 }
