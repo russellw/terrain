@@ -61,26 +61,6 @@ impl RiverGenerator {
         total / count as f32
     }
     
-    fn is_local_maximum(&self, x: usize, y: usize, cells: &[Vec<TerrainCell>]) -> bool {
-        let current_elevation = cells[y][x].elevation;
-        
-        for dy in -1i32..=1 {
-            for dx in -1i32..=1 {
-                if dx == 0 && dy == 0 { continue; }
-                
-                let nx = x as i32 + dx;
-                let ny = y as i32 + dy;
-                
-                if nx >= 0 && nx < self.width as i32 && ny >= 0 && ny < self.height as i32 {
-                    if cells[ny as usize][nx as usize].elevation > current_elevation {
-                        return false;
-                    }
-                }
-            }
-        }
-        
-        true
-    }
     
     fn trace_river(&self, start_x: usize, start_y: usize, cells: &mut Vec<Vec<TerrainCell>>) {
         let mut current_x = start_x;
@@ -191,28 +171,4 @@ impl RiverGenerator {
         best_pos
     }
     
-    fn find_lowest_neighbor(&self, x: usize, y: usize, cells: &[Vec<TerrainCell>]) -> Option<(usize, usize)> {
-        let mut lowest_elevation = cells[y][x].elevation;
-        let mut lowest_pos = None;
-        
-        for dy in -1i32..=1 {
-            for dx in -1i32..=1 {
-                if dx == 0 && dy == 0 { continue; }
-                
-                let nx = x as i32 + dx;
-                let ny = y as i32 + dy;
-                
-                if nx >= 0 && nx < self.width as i32 && ny >= 0 && ny < self.height as i32 {
-                    let neighbor_elevation = cells[ny as usize][nx as usize].elevation;
-                    
-                    if neighbor_elevation < lowest_elevation {
-                        lowest_elevation = neighbor_elevation;
-                        lowest_pos = Some((nx as usize, ny as usize));
-                    }
-                }
-            }
-        }
-        
-        lowest_pos
-    }
 }
