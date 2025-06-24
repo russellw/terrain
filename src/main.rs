@@ -41,7 +41,7 @@ pub struct TerrainCell {
     pub has_river: bool,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum BiomeType {
     Ocean,
     Desert,

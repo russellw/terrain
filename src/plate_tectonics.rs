@@ -35,17 +35,34 @@ impl PlateSimulator {
     fn generate_plates(&mut self, count: usize) -> Vec<TectonicPlate> {
         let mut plates = Vec::new();
         
+        // Ensure we have some continental plates spread out
+        let continental_count = (count as f32 * 0.4).max(2.0) as usize;
+        
         for i in 0..count {
-            let center_x = self.rng.gen_range(0.0..self.width as f32);
-            let center_y = self.rng.gen_range(0.0..self.height as f32);
+            let (center_x, center_y) = if i < continental_count {
+                // Spread continental plates more evenly
+                let angle = (i as f32 / continental_count as f32) * 2.0 * std::f32::consts::PI;
+                let radius = (self.width.min(self.height) as f32 * 0.3) + self.rng.gen_range(-50.0..50.0);
+                let cx = (self.width as f32 * 0.5) + radius * angle.cos();
+                let cy = (self.height as f32 * 0.5) + radius * angle.sin();
+                (cx.clamp(50.0, self.width as f32 - 50.0), 
+                 cy.clamp(50.0, self.height as f32 - 50.0))
+            } else {
+                (self.rng.gen_range(0.0..self.width as f32),
+                 self.rng.gen_range(0.0..self.height as f32))
+            };
             
-            let velocity_x = self.rng.gen_range(-2.0..2.0);
-            let velocity_y = self.rng.gen_range(-2.0..2.0);
+            let velocity_x = self.rng.gen_range(-1.5..1.5);
+            let velocity_y = self.rng.gen_range(-1.5..1.5);
             
-            let plate_type = if self.rng.gen_bool(0.3) {
+            let plate_type = if i < continental_count {
                 PlateType::Continental
             } else {
-                PlateType::Oceanic
+                if self.rng.gen_bool(0.2) {
+                    PlateType::Continental
+                } else {
+                    PlateType::Oceanic
+                }
             };
             
             plates.push(TectonicPlate {
@@ -124,32 +141,66 @@ impl PlateSimulator {
     fn generate_base_elevation(&self, cells: &mut Vec<Vec<TerrainCell>>) {
         for y in 0..self.height {
             for x in 0..self.width {
-                let noise_value = self.noise.get([
-                    x as f64 / 100.0,
-                    y as f64 / 100.0,
-                ]) as f32;
+                // Multi-octave noise for more detailed terrain
+                let large_features = self.noise.get([x as f64 / 200.0, y as f64 / 200.0]) as f32;
+                let medium_features = self.noise.get([x as f64 / 100.0, y as f64 / 100.0]) as f32 * 0.5;
+                let small_features = self.noise.get([x as f64 / 50.0, y as f64 / 50.0]) as f32 * 0.25;
                 
-                let base_elevation = noise_value * 0.5 + 0.5;
-                cells[y as usize][x as usize].elevation += base_elevation;
+                let combined_noise = large_features + medium_features + small_features;
+                let base_elevation = (combined_noise * 0.3 + 0.4).max(0.0);
+                
+                cells[y as usize][x as usize].elevation = base_elevation;
             }
         }
     }
     
     fn add_mountain_ranges(&self, cells: &mut Vec<Vec<TerrainCell>>, plates: &[TectonicPlate]) {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let plate_id = cells[y as usize][x as usize].plate_id;
-                let plate = &plates[plate_id];
+        // First pass: identify plate boundaries and add mountains there
+        for y in 1..self.height - 1 {
+            for x in 1..self.width - 1 {
+                let current_plate = cells[y as usize][x as usize].plate_id;
+                let current_plate_type = plates[current_plate].plate_type;
                 
-                if matches!(plate.plate_type, PlateType::Continental) {
-                    let mountain_noise = self.noise.get([
-                        x as f64 / 50.0,
-                        y as f64 / 50.0,
-                        1.0,
+                // Check if we're at a plate boundary
+                let neighbors = [
+                    cells[(y - 1) as usize][x as usize].plate_id,
+                    cells[(y + 1) as usize][x as usize].plate_id,
+                    cells[y as usize][(x - 1) as usize].plate_id,
+                    cells[y as usize][(x + 1) as usize].plate_id,
+                ];
+                
+                let is_boundary = neighbors.iter().any(|&neighbor_plate| {
+                    neighbor_plate != current_plate && 
+                    matches!((current_plate_type, plates[neighbor_plate].plate_type),
+                        (PlateType::Continental, PlateType::Continental) |
+                        (PlateType::Continental, PlateType::Oceanic) |
+                        (PlateType::Oceanic, PlateType::Continental))
+                });
+                
+                if is_boundary {
+                    // Add mountains at plate boundaries
+                    let mountain_strength = self.noise.get([
+                        x as f64 / 30.0,
+                        y as f64 / 30.0,
+                        2.0,
                     ]) as f32;
                     
-                    if mountain_noise > 0.3 {
-                        cells[y as usize][x as usize].elevation += (mountain_noise - 0.3) * 2.0;
+                    if mountain_strength > 0.1 {
+                        let elevation_boost = (mountain_strength - 0.1) * 1.5;
+                        cells[y as usize][x as usize].elevation += elevation_boost;
+                    }
+                }
+                
+                // Add some mountains within continental plates too
+                if matches!(current_plate_type, PlateType::Continental) {
+                    let inland_mountain_noise = self.noise.get([
+                        x as f64 / 80.0,
+                        y as f64 / 80.0,
+                        3.0,
+                    ]) as f32;
+                    
+                    if inland_mountain_noise > 0.4 {
+                        cells[y as usize][x as usize].elevation += (inland_mountain_noise - 0.4) * 0.8;
                     }
                 }
             }
