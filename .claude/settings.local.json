@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cargo check:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(cargo:*)",
+      "Bash(rg:*)",
+      "Bash(./target/debug/terrain-generator:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ],
+    "deny": []
+  }
+}
