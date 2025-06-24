@@ -31,7 +31,7 @@ fn get_biome_color(biome: &BiomeType, elevation: f32) -> Rgb<u8> {
         BiomeType::Tundra => Rgb([176, 196, 222]),
         BiomeType::Mountain => {
             let height_factor = elevation.min(2.0) / 2.0;
-            let gray_value = (128 + height_factor * 100.0) as u8;
+            let gray_value = (128.0 + height_factor * 100.0) as u8;
             Rgb([gray_value, gray_value, gray_value])
         },
         BiomeType::River => Rgb([0, 191, 255]),

@@ -1,6 +1,5 @@
 use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 mod terrain;
 mod plate_tectonics;
@@ -18,10 +17,10 @@ struct Args {
     #[arg(short, long, default_value = "512")]
     width: u32,
     
-    #[arg(short, long, default_value = "512")]
+    #[arg(short = 'H', long, default_value = "512")]
     height: u32,
     
-    #[arg(short, long, default_value = "30.0")]
+    #[arg(short = 'p', long, default_value = "30.0")]
     water_percentage: f32,
     
     #[arg(short, long, default_value = "terrain")]

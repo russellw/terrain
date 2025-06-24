@@ -57,7 +57,7 @@ impl RiverGenerator {
         true
     }
     
-    fn trace_river(&self, start_x: usize, start_y: usize, cells: &mut Vec<Vec<TerrainCell>]) {
+    fn trace_river(&self, start_x: usize, start_y: usize, cells: &mut Vec<Vec<TerrainCell>>) {
         let mut current_x = start_x;
         let mut current_y = start_y;
         let mut visited = std::collections::HashSet::new();

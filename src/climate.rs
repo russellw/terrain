@@ -66,7 +66,7 @@ impl ClimateSimulator {
         }
     }
     
-    fn transfer_moisture(&self, from_x: u32, from_y: u32, to_x: u32, to_y: u32, 
+    fn transfer_moisture(&self, _from_x: u32, _from_y: u32, to_x: u32, to_y: u32, 
                         amount: f32, cells: &mut Vec<Vec<TerrainCell>>) {
         if to_x < self.width && to_y < self.height {
             cells[to_y as usize][to_x as usize].rainfall += amount;
@@ -76,6 +76,7 @@ impl ClimateSimulator {
     fn calculate_rainfall(&self, cells: &mut Vec<Vec<TerrainCell>>) {
         for y in 0..self.height {
             for x in 0..self.width {
+                let convection_rainfall = self.calculate_convection_rainfall(x, y, cells);
                 let cell = &mut cells[y as usize][x as usize];
                 
                 if !cell.is_water {
@@ -85,8 +86,6 @@ impl ClimateSimulator {
                     } else {
                         0.1
                     };
-                    
-                    let convection_rainfall = self.calculate_convection_rainfall(x, y, cells);
                     
                     cell.rainfall += elevation_factor * temperature_factor * 5.0 + convection_rainfall;
                     cell.rainfall = cell.rainfall.min(20.0);

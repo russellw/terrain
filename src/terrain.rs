@@ -35,17 +35,18 @@ impl TerrainGenerator {
         let mut plate_sim = PlateSimulator::new(self.width, self.height, self.seed);
         let plates = plate_sim.simulate(&mut cells);
         
-        let mut climate_sim = ClimateSimulator::new(self.width, self.height);
+        let climate_sim = ClimateSimulator::new(self.width, self.height);
         climate_sim.simulate(&mut cells);
         
         self.assign_water_bodies(&mut cells);
         
-        let mut biome_assigner = BiomeAssigner::new();
+        let biome_assigner = BiomeAssigner::new();
         biome_assigner.assign_biomes(&mut cells);
         
-        let mut river_gen = RiverGenerator::new(self.width, self.height);
+        let river_gen = RiverGenerator::new(self.width, self.height);
         river_gen.generate_rivers(&mut cells);
         
+        let plate_count = plates.len();
         TerrainData {
             width: self.width,
             height: self.height,
@@ -54,7 +55,7 @@ impl TerrainGenerator {
             generation_params: GenerationParams {
                 water_percentage: self.water_percentage,
                 seed: self.seed,
-                plate_count: plates.len(),
+                plate_count,
             },
         }
     }
