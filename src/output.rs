@@ -72,9 +72,11 @@ fn get_water_color(elevation: f32) -> Rgb<u8> {
 }
 
 fn get_river_color(elevation: f32) -> Rgb<u8> {
-    let flow_factor = (1.0 - elevation * 0.3).max(0.3);
-    let blue = (100.0 + flow_factor * 100.0) as u8;
-    Rgb([20, 80, blue])
+    // Make rivers clearly visible as flowing water
+    let flow_factor = (1.0 - elevation * 0.2).max(0.4);
+    let blue = (120.0 + flow_factor * 120.0) as u8;
+    let green = (60.0 + flow_factor * 40.0) as u8;
+    Rgb([10, green, blue])
 }
 
 fn calculate_vegetation_density(cell: &crate::TerrainCell) -> f32 {

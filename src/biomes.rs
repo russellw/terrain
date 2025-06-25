@@ -79,10 +79,10 @@ impl BiomeAssigner {
             }
         }
         
-        // Smooth non-water biomes
+        // Smooth non-water biomes (but preserve rivers)
         for y in 1..height - 1 {
             for x in 1..width - 1 {
-                if !cells[y][x].is_water {
+                if !cells[y][x].is_water && !cells[y][x].has_river {
                     let neighbors = self.get_neighbor_biomes(x, y, cells);
                     let current_biome = cells[y][x].biome;
                     
@@ -103,10 +103,10 @@ impl BiomeAssigner {
             }
         }
         
-        // Apply smoothed biomes
+        // Apply smoothed biomes (but preserve rivers)
         for y in 0..height {
             for x in 0..width {
-                if !cells[y][x].is_water {
+                if !cells[y][x].is_water && !cells[y][x].has_river {
                     cells[y][x].biome = new_biomes[y][x];
                 }
             }

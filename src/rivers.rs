@@ -1,4 +1,4 @@
-use crate::{TerrainCell, BiomeType};
+use crate::TerrainCell;
 
 pub struct RiverGenerator {
     width: u32,
@@ -80,9 +80,9 @@ impl RiverGenerator {
             }
             
             // Only mark as river if flow is significant enough
-            if flow_volume > 0.5 {
+            if flow_volume > 0.3 {
                 cells[current_y][current_x].has_river = true;
-                cells[current_y][current_x].biome = BiomeType::River;
+                // Don't override biome - let the visualization handle it
             }
             
             // Add flow from local rainfall and nearby rivers
